@@ -3,17 +3,28 @@ import 'package:frivia_app/provider/game_page_provider.dart';
 import 'package:provider/provider.dart';
 
 class GamePage extends StatelessWidget {
-  GamePage({Key? key}) : super(key: key);
+  GamePage({Key? key, required this.difficultyLevel}) : super(key: key);
   double? deviceHeight;
   double? deviceWidth;
   GamePageProvider? _pageProvider;
+  String difficultyLevel;
   @override
   Widget build(BuildContext context) {
     deviceHeight = MediaQuery.of(context).size.height;
     deviceWidth = MediaQuery.of(context).size.width;
-    return ChangeNotifierProvider(
-      create: (context) => GamePageProvider(context: context),
-      child: _buildUI(),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        title: const Text(
+          'Frivia Question',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        ),
+      ),
+      body: ChangeNotifierProvider(
+        create: (context) =>
+            GamePageProvider(context: context, dfcLevel: difficultyLevel),
+        child: _buildUI(),
+      ),
     );
   }
 

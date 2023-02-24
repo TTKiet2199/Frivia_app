@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 
 class GamePageProvider extends ChangeNotifier {
   final Dio dio = Dio();
+  final String dfcLevel;
   final int maxQuestion = 10;
   int questionCount = 0;
   List? questions;
+  int correctCount = 0;
   BuildContext context;
-  GamePageProvider({required this.context}) {
+  GamePageProvider({required this.context, required this.dfcLevel}) {
     dio.options.baseUrl = 'https://opentdb.com/api.php';
     _getQuestionFromAPI();
   }
@@ -17,12 +19,12 @@ class GamePageProvider extends ChangeNotifier {
     var response = await dio.get('', queryParameters: {
       'amount': 10,
       'type': 'boolean',
-      'difficulty': 'easy'
+      'difficulty': dfcLevel
     });
     var data = jsonDecode(response.toString());
     questions = data["results"];
     notifyListeners();
-    print(data);
+    print(dfcLevel);
   }
 
   String getCurrentQuetsionText() {
@@ -31,6 +33,7 @@ class GamePageProvider extends ChangeNotifier {
 
   void answerQuestion(String answer) async {
     bool isCorrect = questions![questionCount]["correct_answer"] == answer;
+    correctCount += isCorrect ? 1 : 0;
     questionCount++;
     showDialog(
         context: context,
@@ -47,6 +50,31 @@ class GamePageProvider extends ChangeNotifier {
       const Duration(milliseconds: 500),
     );
     Navigator.pop(context);
-    notifyListeners();
+
+    if (questionCount == maxQuestion) {
+      result();
+    } else {
+      notifyListeners();
+    }
+  }
+
+  void result() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext _context) {
+          return AlertDialog(
+            backgroundColor: Colors.blue,
+            title: const Text(
+              'End Game',
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            ),
+            content: Text('Result: $correctCount/$maxQuestion'),
+          );
+        });
+    await Future.delayed(
+      const Duration(seconds: 2),
+    );
+    Navigator.pop(context);
+    Navigator.pop(context);
   }
 }
